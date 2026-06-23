@@ -10,6 +10,8 @@ const state = {
   loadedB: false,
   playing: false,
   audioMode: 'A', // 'A' | 'B' | 'both'
+  ratioA: null,   // 動画の実際のaspect-ratio文字列
+  ratioB: null,
 };
 
 /* ---------- Init ---------- */
@@ -95,8 +97,11 @@ function resetSlot(side) {
   wrapper.style.display = 'none';
   zone.style.display    = 'flex';
 
-  if (side === 'A') state.loadedA = false;
-  else              state.loadedB = false;
+  if (side === 'A') { state.loadedA = false; state.ratioA = null; }
+  else              { state.loadedB = false; state.ratioB = null; }
+
+  // スロットのアスペクト比もリセット
+  document.getElementById(`slot${side}`).style.aspectRatio = '';
 
   if (state.playing) {
     state.playing = false;
@@ -116,6 +121,11 @@ function bindVideoEvents(side) {
   const overlay = document.getElementById(`overlay${side}`);
   const playBtn = document.getElementById(`playBtn${side}`);
 
+  // メタデータ取得後にスロットのaspect-ratioを設定
+  video.addEventListener('loadedmetadata', () => {
+    applySlotAspectRatio(side);
+  });
+
   video.addEventListener('timeupdate', () => updateSeekUI(side));
   video.addEventListener('ended', () => {
     if (getOtherVideo(side).ended || !isLoaded(getOtherSide(side))) {
@@ -127,6 +137,40 @@ function bindVideoEvents(side) {
   // Click on overlay toggles play
   overlay.addEventListener('click', masterPlayPause);
 }
+
+/* ============================================================
+   ASPECT RATIO — スマホ縦向き時にスロット高さを動画比率に追従させる
+   ============================================================ */
+function applySlotAspectRatio(side) {
+  const video = side === 'A' ? state.videoA : state.videoB;
+  const slot  = document.getElementById(`slot${side}`);
+  const { videoWidth: w, videoHeight: h } = video;
+  if (!w || !h) return;
+
+  const ratio = `${w} / ${h}`;
+  if (side === 'A') state.ratioA = ratio;
+  else              state.ratioB = ratio;
+
+  // portrait横向きのときのみスロットにセット
+  updateAllSlotRatios();
+}
+
+function updateAllSlotRatios() {
+  const isPortrait = window.matchMedia('(max-width: 767px) and (orientation: portrait)').matches;
+  ['A', 'B'].forEach(side => {
+    const slot  = document.getElementById(`slot${side}`);
+    const ratio = side === 'A' ? state.ratioA : state.ratioB;
+    if (isPortrait && ratio) {
+      slot.style.aspectRatio = ratio;
+    } else {
+      slot.style.aspectRatio = '';
+    }
+  });
+}
+
+// 画面回転時に再計算
+window.addEventListener('resize', updateAllSlotRatios);
+screen.orientation && screen.orientation.addEventListener('change', updateAllSlotRatios);
 
 function getOtherSide(side) { return side === 'A' ? 'B' : 'A'; }
 function getOtherVideo(side) { return side === 'A' ? state.videoB : state.videoA; }
