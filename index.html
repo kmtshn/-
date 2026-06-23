@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DualPlay — 2動画同時再生</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header__inner">
+      <div class="header__logo">
+        <svg class="header__logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="4" width="10" height="16" rx="2" fill="currentColor" opacity="0.9"/>
+          <rect x="13" y="4" width="10" height="16" rx="2" fill="currentColor" opacity="0.6"/>
+        </svg>
+        <span class="header__logo-text">DualPlay</span>
+      </div>
+      <p class="header__sub">2つの動画を同時に再生・比較</p>
+    </div>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+
+    <!-- VIDEO GRID -->
+    <section class="video-grid" id="videoGrid">
+
+      <!-- Video A -->
+      <div class="video-slot" id="slotA">
+        <div class="upload-zone" id="uploadZoneA" onclick="triggerUpload('A')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'A')">
+          <div class="upload-zone__inner">
+            <div class="upload-zone__icon">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/>
+                <path d="M24 15v18M16 23l8-8 8 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p class="upload-zone__title">動画 A をアップロード</p>
+            <p class="upload-zone__hint">クリックまたはドラッグ&amp;ドロップ</p>
+            <p class="upload-zone__formats">MP4 / WebM / MOV 対応</p>
+          </div>
+        </div>
+        <div class="video-wrapper" id="videoWrapperA" style="display:none;">
+          <video id="videoA" playsinline></video>
+          <div class="video-overlay" id="overlayA">
+            <button class="overlay-btn overlay-btn--play" id="playBtnA" onclick="togglePlay('A')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+            </button>
+          </div>
+          <div class="video-badge">A</div>
+          <button class="video-reset-btn" onclick="resetSlot('A')" title="動画を削除">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <input type="file" id="fileInputA" accept="video/*" style="display:none;" onchange="handleFileSelect(event,'A')" />
+      </div>
+
+      <!-- Divider -->
+      <div class="grid-divider" id="gridDivider"></div>
+
+      <!-- Video B -->
+      <div class="video-slot" id="slotB">
+        <div class="upload-zone" id="uploadZoneB" onclick="triggerUpload('B')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'B')">
+          <div class="upload-zone__inner">
+            <div class="upload-zone__icon">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/>
+                <path d="M24 15v18M16 23l8-8 8 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p class="upload-zone__title">動画 B をアップロード</p>
+            <p class="upload-zone__hint">クリックまたはドラッグ&amp;ドロップ</p>
+            <p class="upload-zone__formats">MP4 / WebM / MOV 対応</p>
+          </div>
+        </div>
+        <div class="video-wrapper" id="videoWrapperB" style="display:none;">
+          <video id="videoB" playsinline></video>
+          <div class="video-overlay" id="overlayB">
+            <button class="overlay-btn overlay-btn--play" id="playBtnB" onclick="togglePlay('B')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+            </button>
+          </div>
+          <div class="video-badge">B</div>
+          <button class="video-reset-btn" onclick="resetSlot('B')" title="動画を削除">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <input type="file" id="fileInputB" accept="video/*" style="display:none;" onchange="handleFileSelect(event,'B')" />
+      </div>
+
+    </section>
+
+    <!-- ===== CONTROL PANEL ===== -->
+    <section class="control-panel" id="controlPanel">
+
+      <!-- Audio Control -->
+      <div class="control-group control-group--audio">
+        <h3 class="control-group__label">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="control-group__icon"><path d="M9 3.5v13L4.5 12H2a1 1 0 01-1-1V9a1 1 0 011-1h2.5L9 3.5zM14.12 6.88a5 5 0 010 6.24M16.95 4.05a9 9 0 010 11.9"/></svg>
+          音声設定
+        </h3>
+        <div class="audio-tabs" id="audioTabs">
+          <button class="audio-tab active" data-audio="A" onclick="setAudio('A')">
+            <span class="audio-tab__badge">A</span>
+            動画Aを優先
+          </button>
+          <button class="audio-tab" data-audio="B" onclick="setAudio('B')">
+            <span class="audio-tab__badge">B</span>
+            動画Bを優先
+          </button>
+          <button class="audio-tab" data-audio="both" onclick="setAudio('both')">
+            <svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px;margin-right:4px;"><path d="M2 4h3l3-2v12l-3-2H2zM11 5a3 3 0 010 6M13 3a6 6 0 010 10"/></svg>
+            両方
+          </button>
+        </div>
+      </div>
+
+      <!-- Playback Controls -->
+      <div class="control-group control-group--playback">
+        <h3 class="control-group__label">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="control-group__icon"><circle cx="10" cy="10" r="9"/><polygon points="8,7 14,10 8,13" fill="white"/></svg>
+          再生コントロール
+        </h3>
+        <div class="playback-controls">
+          <button class="ctrl-btn ctrl-btn--secondary" id="rewindBtn" onclick="rewindBoth()" title="最初に戻る">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+          </button>
+          <button class="ctrl-btn ctrl-btn--primary" id="masterPlayBtn" onclick="masterPlayPause()">
+            <svg viewBox="0 0 24 24" fill="currentColor" id="masterPlayIcon"><polygon points="5,3 19,12 5,21"/></svg>
+          </button>
+          <button class="ctrl-btn ctrl-btn--secondary" id="syncBtn" onclick="syncVideos()" title="同期をリセット">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h5M20 20v-5h-5M4 9a9 9 0 0115.4-4M20 15a9 9 0 01-15.4 4"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress / Seek -->
+      <div class="control-group control-group--seek">
+        <h3 class="control-group__label">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="control-group__icon"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 3v5l3 3-1.4 1.4L8 11.4V5h2z"/></svg>
+          シークバー
+        </h3>
+        <div class="seek-section">
+          <div class="seek-row">
+            <span class="seek-label">A</span>
+            <div class="seek-bar-wrap">
+              <div class="seek-bar-bg">
+                <div class="seek-bar-fill" id="seekFillA"></div>
+              </div>
+              <input type="range" class="seek-range" id="seekA" min="0" max="100" value="0" step="0.1" oninput="onSeek(event,'A')" />
+            </div>
+            <span class="seek-time" id="timeA">0:00</span>
+          </div>
+          <div class="seek-row">
+            <span class="seek-label">B</span>
+            <div class="seek-bar-wrap">
+              <div class="seek-bar-bg">
+                <div class="seek-bar-fill" id="seekFillB"></div>
+              </div>
+              <input type="range" class="seek-range" id="seekB" min="0" max="100" value="0" step="0.1" oninput="onSeek(event,'B')" />
+            </div>
+            <span class="seek-time" id="timeB">0:00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Volume -->
+      <div class="control-group control-group--volume">
+        <h3 class="control-group__label">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="control-group__icon"><path d="M9 3.5v13L4.5 12H2a1 1 0 01-1-1V9a1 1 0 011-1h2.5L9 3.5z"/></svg>
+          音量
+        </h3>
+        <div class="volume-section">
+          <div class="volume-row">
+            <span class="seek-label">A</span>
+            <div class="seek-bar-wrap">
+              <div class="seek-bar-bg">
+                <div class="seek-bar-fill" id="volFillA" style="width:80%"></div>
+              </div>
+              <input type="range" class="seek-range volume-range" id="volA" min="0" max="1" value="0.8" step="0.01" oninput="onVolume(event,'A')" />
+            </div>
+            <span class="seek-time" id="volLabelA">80%</span>
+          </div>
+          <div class="volume-row">
+            <span class="seek-label">B</span>
+            <div class="seek-bar-wrap">
+              <div class="seek-bar-bg">
+                <div class="seek-bar-fill" id="volFillB" style="width:0%"></div>
+              </div>
+              <input type="range" class="seek-range volume-range" id="volB" min="0" max="1" value="0" step="0.01" oninput="onVolume(event,'B')" />
+            </div>
+            <span class="seek-time" id="volLabelB">0%</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ===== TOAST ===== -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
