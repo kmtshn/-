@@ -139,8 +139,9 @@ body {
   .video-grid {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 4px 1fr;
-    aspect-ratio: 9/32;
-    min-height: 60vh;
+    aspect-ratio: unset;   /* JS が各スロットに動的にセット */
+    min-height: unset;
+    height: auto;
   }
 }
 
@@ -175,6 +176,25 @@ body {
   overflow: hidden;
   min-width: 0;
   min-height: 0;
+}
+
+/* portrait時: スロットが動画比率に追従（JSがaspect-ratioを設定） */
+@media (max-width: 767px) and (orientation: portrait) {
+  .video-slot {
+    /* position:relative のまま。高さはaspect-ratioで自動決定 */
+  }
+  .video-wrapper {
+    position: relative !important;
+    inset: unset !important;
+    width: 100%;
+    height: 100%;
+  }
+  .upload-zone {
+    position: relative !important;
+    inset: unset !important;
+    width: 100%;
+    min-height: 160px;
+  }
 }
 
 /* ============================================================
@@ -269,7 +289,7 @@ body {
 .video-wrapper video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
